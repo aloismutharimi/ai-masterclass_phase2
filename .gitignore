@@ -1,5 +1,10 @@
 .env
 
-Mombasa_travel_info.json
+# Course content & notes files
+day1_api.py
 day2_weather.py
 day3_travel_info.py
+
+# Saved files
+Mombasa_travel_info.json
+stock_news_snapshot.json
