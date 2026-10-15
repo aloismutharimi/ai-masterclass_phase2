@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .dashboard {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 30px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    h1 { color: #fff; text-align: center; margin-bottom: 20px; font-size: 24px; }
+    .search-box { display: flex; gap: 10px; margin-bottom: 25px; }
+    input {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      outline: none;
+    }
+    button {
+      background: #4facfe;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    button:hover { background: #3a8fd9; }
+    #weather-display {
+      color: #fff;
+      text-align: center;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .loading { font-size: 18px; opacity: 0.8; }
+    .error { color: #ff6b6b; font-size: 16px; }
+    .weather-icon { font-size: 72px; margin-bottom: 10px; }
+    .city-name { font-size: 22px; font-weight: 600; margin-bottom: 5px; }
+    .temperature { font-size: 48px; font-weight: 700; margin: 10px 0; }
+    .description { font-size: 18px; opacity: 0.9; }
+    .details { display: flex; justify-content: center; gap: 30px; margin-top: 20px; font-size: 14px; opacity: 0.8; }
+  </style>
+</head>
+<body>
+
+<div class="dashboard">
+  <h1>🌤️ Weather Dashboard</h1>
+  <div class="search-box">
+    <input type="text" id="cityInput" placeholder="Enter city name (e.g., Nairobi)" />
+    <button onclick="getWeather()">Search</button>
+  </div>
+  <div id="weather-display">
+    <span class="loading">Enter a city to see the weather.</span>
+  </div>
+</div>
+
+<script>
+// Map WMO weather codes to emojis and descriptions
+const weatherCodeMap = {
+  0: { icon: '☀️', desc: 'Clear sky' },
+  1: { icon: '🌤️', desc: 'Mainly clear' },
+  2: { icon: '⛅', desc: 'Partly cloudy' },
+  3: { icon: '☁️', desc: 'Overcast' },
+  45: { icon: '🌫️', desc: 'Fog' },
+  48: { icon: '🌫️', desc: 'Depositing rime fog' },
+  51: { icon: '🌦️', desc: 'Light drizzle' },
+  53: { icon: '🌦️', desc: 'Moderate drizzle' },
+  55: { icon: '🌦️', desc: 'Dense drizzle' },
+  61: { icon: '🌧️', desc: 'Slight rain' },
+  63: { icon: '🌧️', desc: 'Moderate rain' },
+  65: { icon: '🌧️', desc: 'Heavy rain' },
+  71: { icon: '🌨️', desc: 'Slight snow' },
+  73: { icon: '🌨️', desc: 'Moderate snow' },
+  75: { icon: '🌨️', desc: 'Heavy snow' },
+  80: { icon: '🌦️', desc: 'Rain showers' },
+  81: { icon: '🌦️', desc: 'Moderate rain showers' },
+  82: { icon: '🌦️', desc: 'Violent rain showers' },
+  95: { icon: '⛈️', desc: 'Thunderstorm' },
+  96: { icon: '⛈️', desc: 'Thunderstorm with hail' }
+};
+
+async function getWeather() {
+  const city = document.getElementById('cityInput').value.trim();
+  const display = document.getElementById('weather-display');
+
+  if (!city) {
+    display.innerHTML = '<span class="error">Please enter a city name.</span>';
+    return;
+  }
+
+  display.innerHTML = '<span class="loading">Loading weather data...</span>';
+
+  try {
+    // Step 1: Geocode the city name to get coordinates
+    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`;
+    const geoResponse = await fetch(geoUrl);
+
+    if (!geoResponse.ok) throw new Error('Failed to search for city.');
+
+    const geoData = await geoResponse.json();
+
+    if (!geoData.results || geoData.results.length === 0) {
+      throw new Error('City not found. Please check the spelling.');
+    }
+
+    const { latitude, longitude, name, country } = geoData.results[0];
+
+    // Step 2: Fetch weather using coordinates (now including humidity)
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m`;
+    const weatherResponse = await fetch(weatherUrl);
+
+    if (!weatherResponse.ok) throw new Error('Failed to fetch weather data.');
+
+    const weatherData = await weatherResponse.json();
+    const current = weatherData.current;
+
+    const code = current.weather_code;
+    const weather = weatherCodeMap[code] || { icon: '🌡️', desc: 'Unknown' };
+
+    display.innerHTML = `
+      <div class="weather-icon">${weather.icon}</div>
+      <div class="city-name">${name}, ${country}</div>
+      <div class="temperature">${current.temperature_2m}°C</div>
+      <div class="description">${weather.desc}</div>
+      <div class="details">
+        <span>💨 Wind: ${current.wind_speed_10m} km/h</span>
+        <span>💧 Humidity: ${current.relative_humidity_2m}%</span>
+      </div>
+    `;
+  } catch (error) {
+    display.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+  }
+}
+</script>
+
+</body>
+</html>
