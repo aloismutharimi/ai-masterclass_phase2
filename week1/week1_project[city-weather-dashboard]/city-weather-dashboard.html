@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+Build Plan:
+The problem: A city weather dashboard that lets a user see the current weather of a city,
+a 3-day forecast, and basic country info without opening multiple sites or apps.
+The input: A city name.
+The processing: Three chained API calls.
+  1. OpenWeatherMap /weather — current weather + country code
+  2. OpenWeatherMap /forecast — 3-day forecast
+  3. countries.dev /alpha/{code} — country info (name, capital, region, population, flag)
+The output: A styled dashboard with:
+  - Header: city name, flag, current date
+  - Current weather card: icon, temperature, description, humidity, wind
+  - 3-day forecast row: three mini cards with day, icon, high/low
+  - Country panel: name, capital, region, population
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>City Weather Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    min-height: 100vh;
+    padding: 30px 20px;
+    color: #fff;
+  }
+  .container { max-width: 900px; margin: 0 auto; }
+  h1 { text-align: center; margin-bottom: 24px; font-size: 28px; }
+  .search-box { display: flex; gap: 10px; margin-bottom: 28px; max-width: 500px; margin-left: auto; margin-right: auto; }
+  input {
+    flex: 1; padding: 12px 16px; border: none; border-radius: 10px;
+    font-size: 16px; outline: none;
+  }
+  button {
+    background: #4facfe; color: #fff; border: none; padding: 12px 24px;
+    border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600;
+  }
+  button:hover { background: #3a8fd9; }
+  #app { min-height: 300px; }
+  .loading, .error {
+    text-align: center; padding: 60px 20px; font-size: 18px;
+  }
+  .loading { opacity: 0.85; }
+  .error { color: #ffb3b3; }
+  .card {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+  .header-card { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .header-card h2 { font-size: 26px; }
+  .header-card .date { opacity: 0.8; font-size: 14px; }
+  .current-weather { text-align: center; }
+  .current-weather img { width: 100px; height: 100px; }
+  .current-weather .temp { font-size: 56px; font-weight: 700; margin: 8px 0; }
+  .current-weather .desc { font-size: 18px; text-transform: capitalize; opacity: 0.9; }
+  .metrics { display: flex; justify-content: center; gap: 40px; margin-top: 20px; font-size: 15px; opacity: 0.9; }
+  .forecast-title { font-size: 15px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; margin-bottom: 14px; }
+  .forecast-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .forecast-card { text-align: center; }
+  .forecast-card .day { font-weight: 600; margin-bottom: 6px; }
+  .forecast-card img { width: 60px; height: 60px; }
+  .forecast-card .temps { font-size: 15px; margin-top: 6px; }
+  .forecast-card .temps .low { opacity: 0.7; }
+  .country-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; }
+  .country-grid div { font-size: 15px; }
+  .country-grid .label { opacity: 0.6; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .country-flag { font-size: 40px; margin-right: 10px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🌤️ City Weather Dashboard</h1>
+
+  <div class="search-box">
+    <input type="text" id="cityInput" placeholder="Enter a city (e.g., Nairobi)" />
+    <button onclick="loadDashboard()">Search</button>
+  </div>
+
+  <div id="app">
+    <div class="loading">Enter a city to see its weather, forecast, and country info.</div>
+  </div>
+</div>
+
+<script>
+const API_KEY = "YOUR_OPENWEATHERMAP_KEY_HERE";
+const OWM_BASE = "https://api.openweathermap.org/data/2.5";
+const COUNTRY_BASE = "https://countries.dev/alpha";
+
+async function loadDashboard() {
+  const city = document.getElementById("cityInput").value.trim();
+  const app = document.getElementById("app");
+
+  if (!city) {
+    app.innerHTML = '<div class="error">Please enter a city name.</div>';
+    return;
+  }
+
+  app.innerHTML = '<div class="loading">Fetching live data...</div>';
+
+  try {
+    // --- Call 1 & 2 in parallel: current weather + forecast ---
+    const [currentRes, forecastRes] = await Promise.all([
+      fetch(`${OWM_BASE}/weather?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`),
+      fetch(`${OWM_BASE}/forecast?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`)
+    ]);
+
+    if (!currentRes.ok) throw new Error(`City not found (HTTP ${currentRes.status})`);
+    if (!forecastRes.ok) throw new Error(`Forecast unavailable (HTTP ${forecastRes.status})`);
+
+    const current = await currentRes.json();
+    const forecast = await forecastRes.json();
+
+    // --- Extract country code and fetch country info ---
+    const countryCode = current.sys?.country;
+    let countryInfo = null;
+
+    if (countryCode) {
+      try {
+        const countryRes = await fetch(`${COUNTRY_BASE}/${countryCode}`);
+        if (countryRes.ok) countryInfo = await countryRes.json();
+      } catch (e) {
+        // Non-fatal: continue without country info
+        console.warn("Country info unavailable:", e.message);
+      }
+    }
+
+    renderDashboard(app, current, forecast, countryInfo);
+  } catch (error) {
+    app.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+  }
+}
+
+function renderDashboard(container, current, forecast, country) {
+  const iconUrl = (code) => `https://openweathermap.org/img/wn/${code}@2x.png`;
+
+  // --- Header ---
+  const cityName = current.name;
+  const countryCode = current.sys?.country || "";
+  const flag = country?.flag || "🌍";
+  const today = new Date().toLocaleDateString(undefined, {
+    weekday: "long", year: "numeric", month: "long", day: "numeric"
+  });
+
+  // --- Current weather ---
+  const temp = Math.round(current.main.temp);
+  const feels = Math.round(current.main.feels_like);
+  const humidity = current.main.humidity;
+  const wind = current.wind.speed;
+  const desc = current.weather[0].description;
+  const icon = current.weather[0].icon;
+
+  // --- 3-day forecast ---
+  // Group forecast entries by date, take the first entry per day (skip today)
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const byDay = {};
+  forecast.list.forEach(entry => {
+    const dateKey = entry.dt_txt.slice(0, 10);
+    if (!byDay[dateKey]) byDay[dateKey] = [];
+    byDay[dateKey].push(entry);
+  });
+
+  const forecastDays = Object.keys(byDay)
+    .filter(dateKey => dateKey !== todayKey)
+    .slice(0, 3)
+    .map(dateKey => {
+      const entries = byDay[dateKey];
+      // Pick the entry closest to midday for a representative icon/description
+      const midday = entries.reduce((best, e) => {
+        const hour = parseInt(e.dt_txt.slice(11, 13));
+        return Math.abs(hour - 12) < Math.abs(parseInt(best.dt_txt.slice(11, 13)) - 12) ? e : best;
+      });
+      const temps = entries.map(e => e.main.temp);
+      return {
+        date: new Date(dateKey),
+        icon: midday.weather[0].icon,
+        desc: midday.weather[0].description,
+        high: Math.round(Math.max(...temps)),
+        low: Math.round(Math.min(...temps))
+      };
+    });
+
+  const forecastHtml = forecastDays.map(day => `
+    <div class="forecast-card card">
+      <div class="day">${day.date.toLocaleDateString(undefined, { weekday: "short" })}</div>
+      <img src="${iconUrl(day.icon)}" alt="${day.desc}">
+      <div class="temps">
+        <span>${day.high}°</span>
+        <span class="low"> / ${day.low}°</span>
+      </div>
+    </div>
+  `).join("");
+
+  // --- Country info ---
+  const countryHtml = country ? `
+    <div class="card">
+      <div class="forecast-title">Country Info:</div>
+      <div style="display:flex; align-items:center; margin-bottom: 10px;">
+        <strong style="font-size: 25px;">${country.name || countryCode}</strong>
+      </div>
+      <div class="country-grid">
+        <div><div class="label">Capital</div>${country.capital || "N/A"}</div>
+        <div><div class="label">Region</div>${country.region || "N/A"}</div>
+        <div><div class="label">Population</div>${country.population ? country.population.toLocaleString() : "N/A"}</div>
+        <div><div class="label">Code</div>${countryCode}</div>
+      </div>
+    </div>
+  ` : "";
+
+  // --- Render everything ---
+  container.innerHTML = `
+    <div class="card header-card">
+      <h2>${cityName}, ${countryCode}</h2>
+      <div class="date">${today}</div>
+    </div>
+
+    <div class="card current-weather">
+      <img src="${iconUrl(icon)}" alt="${desc}">
+      <div class="temp">${temp}°C</div>
+      <div class="desc">${desc}</div>
+      <div class="metrics">
+        <span>💧 Humidity: ${humidity}%</span>
+        <span>💨 Wind: ${wind} m/s</span>
+        <span>🌡️ Temperature: ${feels}°C</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="forecast-title">3-Day Forecast</div>
+      <div class="forecast-row">${forecastHtml}</div>
+    </div>
+
+    ${countryHtml}
+  `;
+}
+</script>
+
+</body>
+</html>
