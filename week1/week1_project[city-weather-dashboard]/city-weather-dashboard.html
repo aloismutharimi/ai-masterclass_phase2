@@ -9,7 +9,7 @@ The input: A city name.
 The processing: Three chained API calls.
   1. OpenWeatherMap /weather — current weather + country code
   2. OpenWeatherMap /forecast — 3-day forecast
-  3. countries.dev /alpha/{code} — country info (name, capital, region, population, flag)
+  3. countries.dev /alpha/{code} — country info (name, capital, region, population)
 The output: A styled dashboard with:
   - Header: city name, flag, current date
   - Current weather card: icon, temperature, description, humidity, wind
@@ -92,7 +92,7 @@ The output: A styled dashboard with:
 </div>
 
 <script>
-const API_KEY = "YOUR_OPENWEATHERMAP_KEY_HERE";
+const API_KEY = "29337d43e4eacf368b612283c2c6e4ca";
 const OWM_BASE = "https://api.openweathermap.org/data/2.5";
 const COUNTRY_BASE = "https://countries.dev/alpha";
 
