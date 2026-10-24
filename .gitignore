@@ -1,15 +1,19 @@
 .env
 
 # Course content & notes files
+Week 1:
 day1_api.py
 day2_weather.py
 day3_travel_info.py
 day4_fetch.html
 day5_project_notes
+
+Week 2:
 day1_reading_client_briefs
 day2_writing_proposals
 day3_professional_delivery
 day4_managing_scope
+day4_brief_analysis
 
 
 # Saved files
