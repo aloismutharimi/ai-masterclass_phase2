@@ -1,0 +1,124 @@
+# Simulated Brief:
+Brief: Dairy Co-op Price Checker
+    Hello, we run a small dairy co-op in Kiambu. We have about 30 farmer members who supply milk daily. Right now we have to call or WhatsApp each farmer to tell them the current buying price per litre, which changes weekly. We want a simple tool where a farmer can enter their name and how many litres they supplied, and it will show them the total amount we owe them at today's price. We have no website. A simple program is fine. Budget: KES 8,000. Needed by end of week.
+
+Stage 1: Reading and Analysing the Brief
+- Write down the problem, the deliverable, the deadline, and what is unclear. Take 5 minutes on this before you do anything else. This is the habit you are building.
+Problem: Client spends too much time manually communicating with milk suppliers about current buying price per litre, which changes weekly.
+Deliverable: A tool where a farmer enters their name and how many litres they supplied, then it calculates and returns the total amount the co-op owes them at the week's price.
+Deadline: End of week
+What is unclear: What format does the farmer use to enter their name? How is the current price stored and updated? Who updates the price each week? Does the tool need to store history payments or just calculate the current one? Is it a CLI tool or something else?
+
+Stage 2: Writing a Clarifying Question
+- Choose the one question that would most change your approach. Write it out as you would send it to the client. Then write the assumption you will make if they do not answer before you need to start.
+Where does the current buying price live? If in a spreadsheet, I can read it directly. If someone types it in manually each week, I will need a simple way to update it.
+Assumption in the proposal: I am assuming the current price is stored in a simple text file or a single cell in a spreadsheet. If it is in a database or a more complex system, timeline extends by 1 day.
+
+Stage 3: Writing the Proposal
+- Write a complete proposal: opening, understanding, approach, deliverables, price and timeline, call to action. Include your payment terms. Include your assumption about the price storage.
+
+Hi [Client Name],
+OPENING
+You mentioned making 30 manual calls or WhatsApp messages every week just to tell farmers the buying price. That has to be time-consuming. I can build a simple tool that handles the calculations and lets the farmers check what they are owed on their own.
+UNDERSTANDING
+Before building anything, I would want to confirm three things; first, how exactly is the weekly price currently stored? Second, where do you picture the farmers using the tool? And third, do you need the tool to keep a history of past weekly prices or just for the current week?
+APPROACH
+Assuming the price is updated manually, I will build a lightweight, mobile-friendly web link. Farmers enter their name and litres supplied, and the tool instantly calculates their total pay based on the latest price in your sheet. You will get a simple admin page to update the weekly price.
+DELIVERABLES
+A working mobile web link for farmers to use, an admin page for you to update the price, and a 15-minute handover call so your team knows how to use it.
+PRICE AND TIMELINE
+KES 8,000. Ready in 5 working days from when you provide the Excel file and pay the deposit. 50% upfront, 50% on delivery.
+CALL TO ACTION
+Happy to answer the three questions above before you decide. How do you store the weekly buying price, is it in an Excel file?
+
+Stage 4: Agreement
+- A complete agreement for the simulated brief:
+
+Project Agreement: Dairy Co-op Price Calculator
+Between: [Your Name] ("Developer")
+And: [Client Name / Co-op Name] ("Client")
+Date: [Date]
+
+1. The Goal
+The Developer will build a simple web-based calculator that reads the current milk price from an Excel sheet and calculates how much a farmer is owed based on the litres they supplied, with the ability to print a small receipt.
+
+2. Scope of Work
+✅ What is INCLUDED:
+
+A web page (accessed via a link) that allows the manager to input a farmer's litres and see their total pay.
+
+Integration with the Client's provided Excel file to read the current weekly price.
+
+A print-friendly view so the manager can print a small receipt for the farmer.
+
+A 15-minute handover call.
+
+❌ What is NOT INCLUDED:
+
+Farmer direct access: The farmers will not log in from home; this is for the manager's office use only.
+
+Historical records: The tool only calculates for the current week. It does not store past weekly totals or generate year-end reports.
+
+SMS/WhatsApp automation: The tool does not send messages to farmers.
+
+Excel file maintenance: The Client is responsible for ensuring the Excel price sheet is accurate and updated weekly.
+
+3. Payment Terms (Total: KES 8,000)
+
+Deposit (50%): KES 4,000 due before work begins to secure the timeline.
+
+Final Payment (50%): KES 4,000 due upon delivery of the working tool, before final handover of the code.
+
+4. Timeline (5 Working Days)
+
+Start Date: The day the KES 4,000 deposit clears in the Developer's account.
+
+Delivery Date: 5 working days after the Start Date.
+
+5. Changes & Revisions
+If the Client requests new features or changes after delivery that were not listed in the "Included" section above, the Developer will provide a separate quote for that additional work before proceeding.
+
+6. Agreement
+By sending the deposit, the Client agrees to the terms outlined above.
+
+Developer Name: ______________________
+Client Name: ______________________
+
+Stage 5: Packaging and Delivering
+Complete delivery package
+Clean the code. Write the README with setup instructions and an example output. Write the delivery message as if sending it to the client. Tag it v1.0 and push to GitHub.
+
+Delivery Message:
+Hi [Client Name],
+
+The Dairy Co-op Payment Calculator is complete and ready for use.
+I have tested it with multiple inputs and made sure it handles errors (like someone typing letters instead of numbers) cleanly. It also defaults to KES 55.00 if the price file is missing, so it won't crash on you.
+
+How to use it:
+1. Open the `price.txt` file and type in the new buying price each week (e.g., `55.0`).
+2. Run the script and type the farmer's name and litres.
+3. It will instantly calculate the total.
+
+This covers everything in the original brief. Please review it and if everything looks good, send me a message confirming and I will invoice for the remaining 50%.
+
+Let me know if you have questions.
+
+Regards
+
+Stage 6: Handle a Revision Request
+STEP 6
+Write your response to this request
+The client responds: "This is great! Can we also add a feature where it keeps a log of every farmer's payment so we can see the history at the end of the month?"
+
+Write your response. Is this a bug fix or a new feature? If it is new, quote it separately. If it is in scope, fix it.
+
+A running log of payments was not in the original brief. It is a new feature. Your response should acknowledge the idea, confirm the current delivery is working as agreed, and offer to quote the log feature as a separate add-on.
+
+- My Response
+Hello [Client Name],
+
+I am glad you are happy with the tool. What you are describing, keeping a history log and generating a monthly summary, is a fantastic idea.  It's actually the perfect next step for the co-op, as it will completely eliminate the need for paper records.
+
+Because it is a brand new feature and goes beyond our original scope and agreement, I can scope it out and share a quote if you are ready to go ahead with it.
+
+Let me know what you decide.
