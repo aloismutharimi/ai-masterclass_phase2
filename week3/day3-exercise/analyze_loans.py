@@ -1,4 +1,15 @@
 """
+A microfinance institution in Mombasa wants to understand their loan repayment data before presenting to board members. 
+They want to know: what is the typical loan amount, are there unusually large or small loans, and is there any link between loan size and days to first repayment.
+
+Create a dataset of 150 fictional loan records with columns: loan_id, amount_kes, days_to_first_repayment, county. 
+Run a full statistical summary (mean, median, std, quartiles). 
+Identify outliers using the IQR method and print which loan IDs they are. 
+Calculate the correlation between loan amount and days to repayment and state in one plain sentence what it means. 
+Plot a histogram of loan amounts.
+
+Push to GitHub. Your README should include the correlation sentence written for a non-technical board member.
+
 Mombasa Microfinance — Loan Analysis
 ------------------------------------
 Calculates summary statistics, identifies outliers using IQR,
